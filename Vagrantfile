@@ -13,9 +13,11 @@ end
 
 NETWORK_PREFIX = settings["net"]["network_prefix"]
 SUBNET_MASK = settings["net"]["subnet_mask"]
+SUBNET_MASK_IPV6 = "96"
 
 KUBEADM_TOKEN = "0y5van.5qxccw2ewiarl68v"
 KUBERNETES_MASTER_1_IP = NETWORK_PREFIX + "10"
+KUBERNETES_MASTER_1_IPV6 = "fde4:8dba:82e1::c4"
 
 DOMAIN = ".kubernetes-playground.local"
 DOCKER_REGISTRY_ALIAS = "registry" + DOMAIN
@@ -42,11 +44,14 @@ playground = {
     :box => VAGRANT_X64_KUBERNETES_NODES_BOX_ID,
     :cpus => 2,
     :mac_address => "0800271F9D02",
+    :mac_address_ipv6 => "0900271F9D02",
     :mem => 4096,
     :ip => KUBERNETES_MASTER_1_IP,
+    :ipv6 => KUBERNETES_MASTER_1_IPV6,
     :net_auto_config => true,
     :net_type => NETWORK_TYPE_STATIC_IP,
     :subnet_mask => SUBNET_MASK,
+    :subnet_mask_ipv6 => SUBNET_MASK_IPV6,
     :show_gui => false
   },
   "kubernetes-minion-1" + DOMAIN => {
@@ -210,6 +215,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         host.vm.network :private_network, auto_config: info[:net_auto_config], :mac => "#{info[:mac_address]}", type: info[:net_type]
       elsif(NETWORK_TYPE_STATIC_IP == info[:net_type])
         host.vm.network :private_network, auto_config: info[:net_auto_config], :mac => "#{info[:mac_address]}", ip: "#{info[:ip]}", :netmask => "#{info[:subnet_mask]}"
+      end
+
+      if(info.key?(:ipv6))
+        host.vm.network :private_network, auto_config: info[:net_auto_config], :mac => "#{info[:mac_address_ipv6]}", ip: "#{info[:ipv6]}", :netmask => "#{info[:subnet_mask_ipv6]}"
       end
 
       if info.key?(:alias)
